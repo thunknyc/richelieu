@@ -8,7 +8,7 @@
            args)
     (apply f args)))
 
-(defn advisor
+(defn- advisor
   [f advice]
   (if (seq advice)
     (with-meta

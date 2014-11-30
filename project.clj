@@ -1,6 +1,8 @@
-(defproject richelieu "0.1.0-SNAPSHOT"
-  :description "FIXME: write description"
-  :url "http://example.com/FIXME"
+(defproject thunknyc/richelieu "0.1.0-SNAPSHOT"
+  :description "A Clojure advice library"
+  :url "http://github/thunknyc/richelieu"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
-  :dependencies [[org.clojure/clojure "1.6.0"]])
+  :dependencies [[org.clojure/clojure "1.6.0"]]
+  :codox {:src-dir-uri "http://github.com/thunknyc/richelieu/blob/master/"
+          :src-linenum-anchor-prefix "L"})

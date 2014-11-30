@@ -1,6 +1,6 @@
 (ns richelieu.core)
 
-(defn apply-advice
+(defn- apply-advice
   [advice f args]
   (if (seq advice)
     (apply (first advice)

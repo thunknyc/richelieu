@@ -48,6 +48,13 @@ _around_ functions, not _before_ and/or _after_.
               (advise-trace :around-plus1)
               (advise #'times2-advice)
               (advise-trace :around-times2)))
+
+;; user> (add* 1)
+;; > :around-times2 (1)
+;; > :around-plus1 (2)
+;; < :around-plus1 3
+;; < :around-times2 3
+;; ;; => 3
 ```
 
 ## License

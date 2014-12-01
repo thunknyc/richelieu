@@ -27,34 +27,52 @@ _around_ functions, not _before_ and/or _after_.
 ## Usage
 
 ```clojure
-(require '[richelieu.core :refer [advice]])
+(require '[richelieu.core :refer [advice advise-var
+                                  *current-advised*
+                                  defadvice]])
 
+;;; This is a simple function.
 (defn add [& xs] (apply + xs))
 
-(defn plus1-advice [f & xs] (apply f (map inc xs)))
-(defn times2-advice [f & xs] (apply f (map (partial * 2) xs)))
+;;; `defadvice is just a way to use `defn` with '^:unadvisable`
+;;; metadata to prevent crazy infinite advice loops.
+(defadvice plus1
+  "Adds one to each incoming argument, does nothing to the output."
+  [f & xs]
+  (apply f (map inc xs)))
 
-(defn advise-trace
-  [f name]
-  (advise
-   f
-   (fn [g & args] (printf "> %s %s\n" name args)
-     (let [res (apply g args)]
-       (printf "< %s %s\n" name res)
-       res))))
+(defadvice times2
+  "Multiplies each incoming argument by two, does nothing to the
+   output."
+  [f & xs]
+  (apply f (map (partial * 2) xs)))
 
+;;; This tracing advise shows how to get the current advised object,
+;;; which can either be a var or a function value, depending on the
+;;; context in which the advice with added.
+(defadvice trace
+  "Writes passed arguments and passes them to underlying
+  function. Writes resulting value before returning it as result."
+  [f & args]
+  (printf "> %s %s\n" *current-advised* args)
+  (let [res (apply f args)]
+    (printf "< %s %s\n" *current-advised* res)
+    res))
+
+;;; You can advise raw functions.
 (def add* (-> add
-              (advise #'plus1-advice)
-              (advise-trace :around-plus1)
-              (advise #'times2-advice)
-              (advise-trace :around-times2)))
+              (advise plus1)
+              (advise trace)
+              (advise times2)
+              (advise trace)))
 
-;; user> (add* 1)
-;; > :around-times2 (1)
-;; > :around-plus1 (2)
-;; < :around-plus1 3
-;; < :around-times2 3
-;; ;; => 3
+;;; Or vars.
+(advise-var #'add trace)
+(unadvise-var #'add trace)
+
+;;; This is safe because we used `defadvice` to prevent trace from
+;;; advising itself--or other advice functions.
+(advise-ns 'user trace)
 ```
 
 ## License

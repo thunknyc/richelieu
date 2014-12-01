@@ -2,7 +2,12 @@
 
 A Clojure library for applying advice.
 
-## Dicussion
+## Usage
+
+![Clojars Project](http://clojars.org/thunknyc/richelieu/latest-version.svg)
+
+
+## Introduction
 
 While working on thunknyc/profile a couple things dawned on me. First,
 there's more than one way to profile code. The profiling library, as
@@ -18,13 +23,27 @@ terminology) functions. Thus the birth of Richelieu.
 For simplicity's sake, Richelieu focuses exclusively on advising
 _around_ functions, not _before_ and/or _after_.
 
-### Advice functions
+## Advice functions
+
+Advice functions take a function argument followed by zero or more
+arguments. They should generally, after optionally futzing with the
+arguments, call the passed function, and return a value, which should
+generally be the optionally-futzed-with return value.
 
 ```clojure
-(def identity-advice (fn [orig-fn & args] (apply orig-fn args)))
+(defn identity-advice
+  ^:unadvisable
+  [orig-fn & args]
+  (apply orig-fn args))
 ```
 
-## Usage
+You probably want to tell Richelieu to not accidentally advise your
+advice functions; this can result in infinite loops. You can can let
+Richelieu know that it shouldn't advise a var by associating
+`:unadvisable` metadata with it. You can also use the `defadvice`
+macro, which does this (and little else) for you.
+
+## Example
 
 ```clojure
 (require '[richelieu.core :refer [advice advise-var

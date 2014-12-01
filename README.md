@@ -47,7 +47,8 @@ macro, which does this (and little else) for you.
 
 ```clojure
 (require '[richelieu.core :refer [advice
-                                  advise-ns advise-var
+                                  advise-ns
+                                  advise-var unadvise-var
                                   *current-advised*
                                   defadvice]])
 

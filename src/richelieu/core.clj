@@ -73,7 +73,6 @@
   value, advised with `advicef`. No var with `:unadvisable` metadata
   will be advised."
   [var advicef]
-  (prn var)
   (if (not (-> var meta :unadvisable))
     (alter-var-root
      var

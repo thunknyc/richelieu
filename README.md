@@ -58,7 +58,7 @@ macro, which does this (and little else) for you.
 (defn sum-squares [& xs]
   (apply add (map #(mult % %) xs)))
 
-;;; `defadvice is just a way to use `defn` with '^:unadvisable`
+;;; `defadvice` is just a way to use `defn` with '^:unadvisable`
 ;;; metadata to prevent crazy infinite advice loops.
 (defadvice plus1
   "Adds one to each incoming argument, does nothing to the output."

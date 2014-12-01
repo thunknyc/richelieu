@@ -101,7 +101,7 @@
 (defn ^:private ns-functions [ns include-privates?]
   (let [varmap (if include-privates? (ns-interns ns)
                    (ns-publics ns))]
-    (->> (filter (fn [[_ bound]] fn? @bound) varmap)
+    (->> (filter (fn [[_ bound]] (fn? @bound)) varmap)
          (map second))))
 
 (defn advise-ns
@@ -139,4 +139,4 @@
      (advise-ns ns advicef))))
 
 (defmacro defadvice [name docstring args & body]
-  `(defn ~name ~docstring ^:unadvisable ~args ~@body))
+  `(defn ~name ~docstring {:unadvisable true} ~args ~@body))

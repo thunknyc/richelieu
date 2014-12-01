@@ -50,8 +50,11 @@ macro, which does this (and little else) for you.
                                   *current-advised*
                                   defadvice]])
 
-;;; This is a simple function.
+;;; Here are some simple functions.
 (defn add [& xs] (apply + xs))
+(defn mult [& xs] (apply * xs))
+(defn sum-squares [& xs]
+  (apply add (map #(mult % %) xs)))
 
 ;;; `defadvice is just a way to use `defn` with '^:unadvisable`
 ;;; metadata to prevent crazy infinite advice loops.
@@ -66,16 +69,22 @@ macro, which does this (and little else) for you.
   [f & xs]
   (apply f (map (partial * 2) xs)))
 
-;;; This tracing advise shows how to get the current advised object,
+;;; This tracing advice shows how to get the current advised object,
 ;;; which can either be a var or a function value, depending on the
 ;;; context in which the advice with added.
+(def ^:dynamic *trace-depth* 0)
+
+(defn- ^:unadvisable trace-indent []
+  (apply str (repeat *trace-depth* \space)))
+
 (defadvice trace
   "Writes passed arguments and passes them to underlying
   function. Writes resulting value before returning it as result."
-  [f & args]
-  (printf "> %s %s\n" *current-advised* args)
-  (let [res (apply f args)]
-    (printf "< %s %s\n" *current-advised* res)
+  [f & args] 
+  (printf "%s> %s %s\n" (trace-indent) *current-advised* args)
+  (let [res (binding [*trace-depth* (inc *trace-depth*)]
+              (apply f args))]
+    (printf "%s< %s %s\n" (trace-indent) *current-advised* res)
     res))
 
 ;;; You can advise raw functions.
@@ -92,6 +101,8 @@ macro, which does this (and little else) for you.
 ;;; This is safe because we used `defadvice` to prevent trace from
 ;;; advising itself--or other advice functions.
 (advise-ns 'user trace)
+
+(sum-squares 1 2 3 4)
 ```
 
 ## License

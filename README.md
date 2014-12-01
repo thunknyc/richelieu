@@ -103,6 +103,20 @@ macro, which does this (and little else) for you.
 (advise-ns 'user trace)
 
 (sum-squares 1 2 3 4)
+;;; The above invocation produces the following output:
+
+;; > #'user/sum-squares (1 2 3 4)
+;;  > #'user/mult (1 1)
+;;  < #'user/mult 1
+;;  > #'user/mult (2 2)
+;;  < #'user/mult 4
+;;  > #'user/mult (3 3)
+;;  < #'user/mult 9
+;;  > #'user/mult (4 4)
+;;  < #'user/mult 16
+;;  > #'user/add (1 4 9 16)
+;;  < #'user/add 30
+;; < #'user/sum-squares 30
 ```
 
 ## License

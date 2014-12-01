@@ -71,7 +71,7 @@ macro, which does this (and little else) for you.
 
 ;;; This tracing advice shows how to get the current advised object,
 ;;; which can either be a var or a function value, depending on the
-;;; context in which the advice with added.
+;;; context in which the advice was added.
 (def ^:dynamic *trace-depth* 0)
 
 (defn- ^:unadvisable trace-indent []

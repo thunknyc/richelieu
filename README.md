@@ -32,7 +32,7 @@ generally be the optionally-futzed-with return value.
 
 ```clojure
 (defn identity-advice
-  ^:unadvisable
+  ^:richelieu.core/no-advice
   [orig-fn & args]
   (apply orig-fn args))
 ```
@@ -40,8 +40,9 @@ generally be the optionally-futzed-with return value.
 You probably want to tell Richelieu to not accidentally advise your
 advice functions; this can result in infinite loops. You can can let
 Richelieu know that it shouldn't advise a var by associating
-`:unadvisable` metadata with it. You can also use the `defadvice`
-macro, which does this (and little else) for you.
+`:richelieu.core/no-advice` metadata with it. You can also use the
+`defadvice` macro, which does this (and little else) for
+you. I.e. `defn-` is to privacy as `defadvice` is to non-advisability.
 
 ## Example
 
@@ -53,13 +54,15 @@ macro, which does this (and little else) for you.
                                   defadvice]])
 
 ;;; Here are some simple functions.
+
 (defn add [& xs] (apply + xs))
 (defn mult [& xs] (apply * xs))
 (defn sum-squares [& xs]
   (apply add (map #(mult % %) xs)))
 
-;;; `defadvice` is just a way to use `defn` with '^:unadvisable`
+;;; `defadvice` is just a way to use `defn` with '^:richelieu/no-advice`
 ;;; metadata to prevent crazy infinite advice loops.
+
 (defadvice plus1
   "Adds one to each incoming argument, does nothing to the output."
   [f & xs]
@@ -76,7 +79,7 @@ macro, which does this (and little else) for you.
 ;;; context in which the advice was added.
 (def ^:dynamic *trace-depth* 0)
 
-(defn- ^:unadvisable trace-indent []
+(defn- ^:richelieu.core/no-advice trace-indent []
   (apply str (repeat *trace-depth* \space)))
 
 (defadvice trace
@@ -90,6 +93,7 @@ macro, which does this (and little else) for you.
     res))
 
 ;;; You can advise raw functions.
+
 (def add* (-> add
               (advise plus1)
               (advise trace)
@@ -97,11 +101,13 @@ macro, which does this (and little else) for you.
               (advise trace)))
 
 ;;; Or vars.
+
 (advise-var #'add trace)
 (unadvise-var #'add trace)
 
 ;;; This is safe because we used `defadvice` to prevent trace from
 ;;; advising itself--or other advice functions.
+
 (advise-ns 'user trace)
 
 (sum-squares 1 2 3 4)

@@ -70,10 +70,10 @@
 
 (defn advise-var
   "Change binding of `var` to refer to and advised version of its
-  value, advised with `advicef`. No var with `:unadvisable` metadata
-  will be advised."
+  value, advised with `advicef`. No var with
+  `:richelieu.core/no-advice` metadata will be advised."
   [var advicef]
-  (if (not (-> var meta :unadvisable))
+  (if (not (-> var meta ::no-advice))
     (alter-var-root
      var
      (fn [_] (advise* var @var advicef)))))
@@ -107,8 +107,8 @@
 (defn advise-ns
   "Add advice function `advicef` to each function-containing var in
   `ns`. If `advise-privates?` is present and true, also advise private
-  functions inside `ns`. No vars with `:unadvisable` metadata will be
-  advised."
+  functions inside `ns`. No vars with `:richelieu.core/no-advice`
+  metadata will be advised."
   ([ns advicef] (advise-ns ns advicef false))
   ([ns advicef advise-privates?]
    (let [vars (ns-functions ns advise-privates?)]
@@ -131,12 +131,16 @@
   all function-containing public vars in `ns`. Otherwise, add
   `advicef` to all public function-containing vars in `ns`, or all
   public and private ones if `advise-privates?` is present and
-  true. No vars with `:unadvisable` metadata will be advised."
+  true. No vars with `:richelieu.core/no-advice` metadata will be
+  advised."
   ([ns advicef] (toggle-advise-ns ns advicef false))
   ([ns advicef advise-privates?]
    (if (ns-some-advised? ns advicef)
      (unadvise-ns ns advicef)
      (advise-ns ns advicef))))
 
-(defmacro defadvice [name docstring args & body]
-  `(defn ~name ~docstring {:unadvisable true} ~args ~@body))
+(defmacro defadvice
+  "Same as `defn`, but flags var as one which should never have advice
+  applied."
+  [name & decls]
+  `(defn ~(with-meta name (assoc (meta name) ::no-advice true)) ~@decls))

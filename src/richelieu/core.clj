@@ -1,4 +1,8 @@
-(ns richelieu.core)
+(ns richelieu.core
+  (:require [clojure.set :refer [union]]))
+
+(def ^:dynamic *current-advised* nil)
+(def ^:dynamic *current-suppressed* #{})
 
 (defn ^:private apply-advice
   [advice f args]
@@ -8,15 +12,14 @@
            args)
     (apply f args)))
 
-(def ^:dynamic *current-advised* nil)
-
 (defn ^:private advisor
   [label f advice]
   (if (seq advice)
     (with-meta
       (fn [& args]
         (binding [*current-advised* label]
-          (apply-advice advice f args)))
+          (apply-advice (remove *current-suppressed* advice)
+                        f args)))
       {::advised-fn f
        ::advice advice})
     f))
@@ -144,3 +147,11 @@
   applied."
   [name & decls]
   `(defn ~(with-meta name (assoc (meta name) ::no-advice true)) ~@decls))
+
+(defmacro without-advice
+  "Prevent any advice function in `advicefs` evaluate (qua advice) in
+  dynamic scope of body."
+  [advicefs & body]
+  `(binding [*current-suppressed*
+             (union *current-suppressed* (set ~advicefs))]
+     ~@body))

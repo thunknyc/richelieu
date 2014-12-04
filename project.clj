@@ -1,4 +1,4 @@
-(defproject thunknyc/richelieu "0.3.0"
+(defproject thunknyc/richelieu "0.4.0"
   :description "A Clojure advice library"
   :url "http://github.com/thunknyc/richelieu"
   :license {:name "Eclipse Public License"

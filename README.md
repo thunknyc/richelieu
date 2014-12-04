@@ -47,11 +47,7 @@ you. I.e. `defn-` is to privacy as `defadvice` is to non-advisability.
 ## Example
 
 ```clojure
-(require '[richelieu.core :refer [advice
-                                  advise-ns
-                                  advise-var unadvise-var
-                                  *current-advised*
-                                  defadvice]])
+(require '[richelieu.core :refer :all])
 
 ;;; Here are some simple functions.
 
@@ -60,7 +56,7 @@ you. I.e. `defn-` is to privacy as `defadvice` is to non-advisability.
 (defn sum-squares [& xs]
   (apply add (map #(mult % %) xs)))
 
-;;; `defadvice` is just a way to use `defn` with '^:richelieu/no-advice`
+;;; `defadvice` is just a way to use `defn` with ':richelieu/no-advice`
 ;;; metadata to prevent crazy infinite advice loops.
 
 (defadvice plus1
@@ -74,9 +70,21 @@ you. I.e. `defn-` is to privacy as `defadvice` is to non-advisability.
   [f & xs]
   (apply f (map (partial * 2) xs)))
 
+;;; You can advise raw functions.
+
+(def add* (-> add
+              (advise plus1)
+              (advise times2)))
+
+(add* 1 1)
+
+;;; But more often, you'll want to trace vars, which is what the rest
+;;; of the example deals with.
+
 ;;; This tracing advice shows how to get the current advised object,
 ;;; which can either be a var or a function value, depending on the
 ;;; context in which the advice was added.
+
 (def ^:dynamic *trace-depth* 0)
 
 (defn- ^:richelieu.core/no-advice trace-indent []
@@ -91,16 +99,6 @@ you. I.e. `defn-` is to privacy as `defadvice` is to non-advisability.
               (apply f args))]
     (printf "%s< %s %s\n" (trace-indent) *current-advised* res)
     res))
-
-;;; You can advise raw functions.
-
-(def add* (-> add
-              (advise plus1)
-              (advise trace)
-              (advise times2)
-              (advise trace)))
-
-;;; Or vars.
 
 (advise-var #'add trace)
 (unadvise-var #'add trace)
@@ -125,6 +123,26 @@ you. I.e. `defn-` is to privacy as `defadvice` is to non-advisability.
 ;;  > #'user/add (1 4 9 16)
 ;;  < #'user/add 30
 ;; < #'user/sum-squares 30
+
+;;; You can also suppress the evalutation of advice with the
+;;; `without-advice` macro. For example, the following will produce
+;;; no tracing output, but will allow any other advice that (possibly
+;;; someone else) attached to any function.
+
+(without-advice [trace] (sum-squares (1 2 3 4))) ;; ==> 30, no tracing
+
+;;; Finally, it will often be a good idea to refer to advice functions
+;;; via var quoting instead of by a simple reference. This will allow
+;;; you to redefine them during development and still add or remove old
+;;; versions of attached advice functions, because they will be
+;;; associated with the var, not the particular function value that the
+;;; var pointed to at the time.
+
+(advise-ns 'user trace)   ;; This works great until you re-eval
+                          ;; your `(defadvice trace ...)` form.
+
+(advise-ns 'user #'trace) ;; Infinitesimally slower but highly
+                          ;; recommended.
 ```
 
 ## License

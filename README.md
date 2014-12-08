@@ -23,6 +23,11 @@ terminology) functions. Thus the birth of Richelieu.
 For simplicity's sake, Richelieu focuses exclusively on advising
 _around_ functions, not _before_ and/or _after_.
 
+For an example of Richelieu in action, see
+[Henri](http://github.com/thunknyc/henri), a tracing library that can
+send statistics to either `*err*`, Hosted Graphite, or Datadog via
+`statsd`.
+
 ## Advice functions
 
 Advice functions take a function argument followed by zero or more
